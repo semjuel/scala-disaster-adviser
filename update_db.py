@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 def send_notification(event):
     notification = {
-        "date": {"description": event['title'],
+        "disaster": {"description": event['title'],
                  "date": datetime.timestamp(pd.to_datetime(event['geometry'][0]['date'])),
                  "lat": event['geometry'][0]['coordinates'][0],
                  "lon": event['geometry'][0]['coordinates'][1]}
