@@ -1,0 +1,20 @@
+
+kafka:
+  bootstrap-servers: 172.23.0.3:9091
+  user-events:
+    topic: user-events
+  disaster-events:
+    topic: disaster-events
+
+user-service:
+  endpoint: localhost:8090/user-events
+
+disaster-service:
+  endpoint: localhost:8090/disasters
+
+notification-service:
+  timestamp-gap: 604800000
+  coordinates-gap: 0.5
+
+server:
+  port: 8080

@@ -1,2 +1,11 @@
+.notification-service/target
+.idea/
+*.iml
+*.classpath
+
+*.project
+*.factorypath
+
+
 *.class
 *.log
