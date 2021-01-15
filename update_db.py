@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 import pandas as pd
 from pymongo import MongoClient
+from confluent_kafka import Producer
+import socket
 
 
 def send_notification(event):
