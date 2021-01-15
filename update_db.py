@@ -15,8 +15,13 @@ def send_notification(event):
     }
     print(notification)
     # TO DO change url
-    r = requests.post('http://127.0.0.1:5000/new', json=json.dumps(notification))
-    print(r.status_code)
+    # r = requests.post('http://127.0.0.1:5000/new', json=json.dumps(notification))
+    # print(r.status_code)
+
+    conf = {'bootstrap.servers': "host1:9092,host2:9092",
+            'client.id': socket.gethostname()}
+    producer = Producer(conf)
+    producer.produce(topic, key=event['id'], value=notification)
 
 def get_events():
     conn = MongoClient()
