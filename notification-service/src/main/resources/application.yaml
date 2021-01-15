@@ -7,10 +7,10 @@ kafka:
     topic: disaster-events
 
 user-service:
-  endpoint: localhost:8090/user-events
+  endpoint: 192.168.0.111:8090/user-events
 
 disaster-service:
-  endpoint: localhost:8090/disasters
+  endpoint: 192.168.0.111:8090/disasters
 
 notification-service:
   timestamp-gap: 604800000
