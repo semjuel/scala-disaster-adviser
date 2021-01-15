@@ -1,5 +1,6 @@
 import requests
 import time
+import json
 from datetime import datetime
 import pandas as pd
 from pymongo import MongoClient
@@ -13,8 +14,9 @@ def send_notification(event):
                  "lon": event['geometry'][0]['coordinates'][1]}
     }
     print(notification)
-    # TO DO - add post request to other server
-
+    # TO DO change url
+    r = requests.post('http://127.0.0.1:5000/new', json=json.dumps(notification))
+    print(r.status_code)
 
 def get_events():
     conn = MongoClient()
