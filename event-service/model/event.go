@@ -16,7 +16,7 @@ type EventSearch struct {
 
 type Event struct {
 	id        int
-	Summary   string    `json:"summary"`
+	Summary   string    `json:"description"`
 	Uuid      string    `json:"name"`
 	Location  string    `json:"location"`
 	Latitude  float64   `json:"lat"`
