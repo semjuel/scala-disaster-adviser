@@ -2,9 +2,8 @@ version: '3.7'
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.0.1
+    image: confluentinc/cp-zookeeper:latest
     hostname: zookeeper
-    container_name: zookeeper
     ports:
       - "2181:2181"
     environment:
@@ -20,11 +19,13 @@ services:
     ports:
       - "9092:9092"
       - "9101:9101"
+      - "29092:29092"
+      - "29091:29091"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:29091
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -40,6 +41,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   event-service:
+    hostname: event-service
     build:
       context: .
       dockerfile: ./docker/event-service/Dockerfile
@@ -57,20 +59,6 @@ services:
     volumes:
       - ./:/go/src/scala-disaster-adviser
 
-  notification-service:
-    container_name: notification-service
-    build:
-      context: .
-      dockerfile: ./docker/notification-service/Dockerfile
-    depends_on:
-      - broker
-    ports:
-      - 8080:8080
-    environment:
-      - KAFKA_SERVER=broker:29092
-      - USER_SERVICE_ENDPOINT=event-service/events
-      - DISASTER_SERVICE_ENDPOINT=192.168.0.111:8090/disasters
-
   da_postgresql:
     image: postgis/postgis
     environment:
@@ -81,3 +69,19 @@ services:
       - 9032:5432
     volumes:
       - ./docker/postgresql/database:/docker-entrypoint-initdb.d/
+
+  notification-service:
+    hostname: notification-service
+    container_name: notification-service
+    build:
+      context: https://github.com/semjuel/scala-disaster-adviser.git#:notification-service/src/docker
+    depends_on:
+      - broker
+      - event-service
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_SERVER=broker:29092
+      - USER_SERVICE_ENDPOINT=http://192.168.0.111:8090/disasters
+      - DISASTER_SERVICE_ENDPOINT=http://192.168.0.111:8090/user-events
+
