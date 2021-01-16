@@ -23,11 +23,11 @@ func SendEvent() {
 	host := host()
 	conn, err := kafka.DialLeader(context.Background(), "tcp", host, topic, 0)
 	if err != nil {
-		log.Fatal("failed to dial leader:", err)
+		log.Printf("failed to dial leader: %s", err)
 	}
 	err = conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
-		log.Fatal("kafka error:", err)
+		log.Printf("kafka error: %s", err)
 	}
 
 	msg1 := msg{
@@ -48,11 +48,11 @@ func SendEvent() {
 		// kafka.Message{Value: []byte("three!")},
 	)
 	if err != nil {
-		log.Fatal("failed to write messages:", err)
+		log.Printf("failed to write messages: %s", err)
 	}
 
 	if err := conn.Close(); err != nil {
-		log.Fatal("failed to close writer:", err)
+		log.Printf("failed to close writer: %s", err)
 	}
 
 }
