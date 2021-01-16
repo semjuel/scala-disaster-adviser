@@ -15,17 +15,23 @@ type EventSearch struct {
 }
 
 type Event struct {
-	Id        int       `json:"id"`
+	id        int
 	Summary   string    `json:"summary"`
+	Uuid      string    `json:"name"`
 	Location  string    `json:"location"`
-	Latitude  float64   `json:"latitude"`
-	Longitude float64   `json:"longitude"`
-	StartDate time.Time `json:"start"`
-	EndDate   time.Time `json:"end"`
+	Latitude  float64   `json:"lat"`
+	Longitude float64   `json:"lon"`
+	StartDate time.Time `json:"date"`
+	endDate   time.Time
 }
 
-func (e EventSearch) FindEvents() []Event {
-	var response = make([]Event, 0)
+type EventResponse struct {
+	Events []Event `json:"events"`
+}
+
+func (e EventSearch) FindEvents() EventResponse {
+	var empty = make([]Event, 0)
+	var response = EventResponse{empty}
 	var events []Event
 
 	db, err := database.Connect()
@@ -34,9 +40,11 @@ func (e EventSearch) FindEvents() []Event {
 		return response
 	}
 
-	rows, err := db.Query("SELECT id, summary, location, latitude, longitude, start_date, end_date"+
-		" FROM events WHERE start_date >= $1 AND end_date <= $2 "+
-		" AND ST_DWithin(geom, ST_MakePoint($3,$4)::geography, $5)", time.Unix(e.Start, 0), time.Unix(e.End, 0), e.Longitude, e.Latitude, e.Radius)
+	rows, err := db.Query("SELECT e.id, e.summary, u.uuid, e.location, e.latitude, e.longitude, e.start_date, e.end_date "+
+		" FROM events e "+
+		" INNER JOIN users u ON u.id = e.user_id "+
+		" WHERE e.start_date >= $1 AND e.end_date <= $2 "+
+		" AND ST_DWithin(e.geom, ST_MakePoint($3,$4)::geography, $5)", time.Unix(e.Start, 0), time.Unix(e.End, 0), e.Longitude, e.Latitude, e.Radius)
 	if err != nil {
 		log.Printf("Wrong request to the db, %v", err)
 		return response
@@ -45,7 +53,7 @@ func (e EventSearch) FindEvents() []Event {
 
 	for rows.Next() {
 		var event Event
-		err := rows.Scan(&event.Id, &event.Summary, &event.Location, &event.Latitude, &event.Longitude, &event.StartDate, &event.EndDate)
+		err := rows.Scan(&event.id, &event.Summary, &event.Uuid, &event.Location, &event.Latitude, &event.Longitude, &event.StartDate, &event.endDate)
 		if err == nil {
 			events = append(events, event)
 		} else {
@@ -57,5 +65,5 @@ func (e EventSearch) FindEvents() []Event {
 		return response
 	}
 
-	return events
+	return EventResponse{events}
 }

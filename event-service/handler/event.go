@@ -9,6 +9,22 @@ import (
 	"time"
 )
 
+type request struct {
+	Date     date     `json:"date"`
+	Location location `json:"location"`
+}
+
+type date struct {
+	Timestamp string `json:"timestamp"`
+	Range     int64  `json:"range"`
+}
+
+type location struct {
+	Lat   float64 `json:"lat"`
+	Lon   float64 `json:"lon"`
+	Range float64 `json:"range"`
+}
+
 func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
@@ -19,7 +35,7 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
-	case http.MethodPost:
+	case http.MethodGet:
 		// @TODO remove this
 		//kw := &kafka.Writer{
 		//	Addr:  kafka.TCP("localhost:9092"),
@@ -44,19 +60,28 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		break
 
-	case http.MethodGet:
+	case http.MethodPost:
+		decoder := json.NewDecoder(r.Body)
+		var req request
+		err := decoder.Decode(&req)
+		if err != nil {
+			log.Printf("Decode error %s \n", err)
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
+		}
+
 		eventSearch := model.EventSearch{
-			Start:     getStartDate(r),
-			End:       getEndDate(r),
-			Radius:    getRadius(r),
-			Longitude: getLongitude(r),
-			Latitude:  getLatitude(r),
+			Start:     getStartDate(req),
+			End:       getEndDate(req),
+			Radius:    getRadius(req),
+			Longitude: getLongitude(req),
+			Latitude:  getLatitude(req),
 		}
 
 		events := eventSearch.FindEvents()
 
 		w.WriteHeader(http.StatusOK)
-		err := json.NewEncoder(w).Encode(events)
+		err = json.NewEncoder(w).Encode(events)
 		if err != nil {
 			log.Printf("Encoder error %v \n", err)
 		}
@@ -69,55 +94,38 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getRadius(r *http.Request) int64 {
-	// Default radius = 5km.
-	return getIntParamFromQuery(r, "radius", 5000)
+func getRadius(r request) int64 {
+	return int64(r.Location.Range * 1000)
 }
 
-func getStartDate(r *http.Request) int64 {
+func getStartDate(r request) int64 {
 	now := time.Now()
 	sec := now.Unix()
-	return getIntParamFromQuery(r, "start", sec)
+
+	value, err := strconv.ParseInt(r.Date.Timestamp, 10, 32)
+	if err != nil {
+		return sec - r.Date.Range
+	}
+
+	return value - r.Date.Range
 }
 
-func getEndDate(r *http.Request) int64 {
+func getEndDate(r request) int64 {
 	now := time.Now()
-	sec := now.Unix() + 3600
-	return getIntParamFromQuery(r, "end", sec)
-}
+	sec := now.Unix()
 
-func getLongitude(r *http.Request) float64 {
-	return getFloatParamFromQuery(r, "longitude", 0)
-}
-
-func getLatitude(r *http.Request) float64 {
-	return getFloatParamFromQuery(r, "latitude", 0)
-}
-
-func getIntParamFromQuery(r *http.Request, name string, defaultValue int64) int64 {
-	params, ok := r.URL.Query()[name]
-	if !ok || len(params) < 1 {
-		return defaultValue
-	}
-
-	value, err := strconv.ParseInt(params[0], 10, 32)
+	value, err := strconv.ParseInt(r.Date.Timestamp, 10, 32)
 	if err != nil {
-		return defaultValue
+		return sec + r.Date.Range
 	}
 
-	return value
+	return value + r.Date.Range
 }
 
-func getFloatParamFromQuery(r *http.Request, name string, defaultValue float64) float64 {
-	params, ok := r.URL.Query()[name]
-	if !ok || len(params) < 1 {
-		return defaultValue
-	}
+func getLongitude(r request) float64 {
+	return r.Location.Lon
+}
 
-	value, err := strconv.ParseFloat(params[0], 32)
-	if err != nil {
-		return defaultValue
-	}
-
-	return value
+func getLatitude(r request) float64 {
+	return r.Location.Lat
 }
