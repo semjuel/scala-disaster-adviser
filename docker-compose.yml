@@ -82,6 +82,6 @@ services:
       - "8080:8080"
     environment:
       - KAFKA_SERVER=broker:29092
-      - USER_SERVICE_ENDPOINT=http://192.168.0.111:8090/disasters
-      - DISASTER_SERVICE_ENDPOINT=http://192.168.0.111:8090/user-events
+      - USER_SERVICE_ENDPOINT=http://192.168.0.111:8090/user-events
+      - DISASTER_SERVICE_ENDPOINT=http://192.168.0.111:8090/disasters
 
