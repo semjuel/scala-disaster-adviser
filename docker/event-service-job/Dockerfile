@@ -25,4 +25,4 @@ WORKDIR $GOPATH/src/${SERVICE_PATH}
 # Install all dependencies.
 RUN dep ensure
 
-CMD ["go", "run", "main.go"]
+CMD ["go", "run", "task.go"]
