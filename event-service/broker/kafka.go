@@ -11,11 +11,11 @@ import (
 )
 
 type msg struct {
-	Name        string
-	Date        int64
-	Lat         float64
-	Lon         float64
-	Description string
+	Name        string  `json:"name"`
+	Date        int64   `json:"date"`
+	Lat         float64 `json:"lat"`
+	Lon         float64 `json:"lon"`
+	Description string  `json:"dscription"`
 }
 
 func SendEvent() {
