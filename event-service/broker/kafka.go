@@ -2,12 +2,20 @@ package broker
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"os"
 	"time"
 
 	"github.com/segmentio/kafka-go"
 )
+
+type msg struct {
+	Name string
+	Date int64
+	Lat  float64
+	Lon  float64
+}
 
 func SendEvent() {
 	topic := "user-events"
@@ -21,10 +29,21 @@ func SendEvent() {
 		log.Fatal("kafka error:", err)
 	}
 
+	msg1 := msg{
+		"username",
+		1610804729,
+		45.234235,
+		90.34234,
+	}
+	b1, err := json.Marshal(msg1)
+	if err != nil {
+		log.Printf("marshal error: %s", err)
+	}
+
 	_, err = conn.WriteMessages(
-		kafka.Message{Value: []byte("one!")},
-		kafka.Message{Value: []byte("two!")},
-		kafka.Message{Value: []byte("three!")},
+		kafka.Message{Value: b1},
+		// kafka.Message{Value: []byte("two!")},
+		// kafka.Message{Value: []byte("three!")},
 	)
 	if err != nil {
 		log.Fatal("failed to write messages:", err)
