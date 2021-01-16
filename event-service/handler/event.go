@@ -35,31 +35,6 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
-	case http.MethodGet:
-		// @TODO remove this
-		//kw := &kafka.Writer{
-		//	Addr:  kafka.TCP("localhost:9092"),
-		//	Topic: "user-events",
-		//}
-		//
-		//err := kw.WriteMessages(context.Background(),
-		//	kafka.Message{
-		//		Key:   []byte("Key-A"),
-		//		Value: []byte("Hello World!"),
-		//	},
-		//)
-		//if err != nil {
-		//	log.Printf("Kafka connection error %s", err)
-		//	w.WriteHeader(http.StatusOK)
-		//	return
-		//}
-		//
-		//kw.Close()
-
-		log.Printf("Success")
-		w.WriteHeader(http.StatusOK)
-		break
-
 	case http.MethodPost:
 		decoder := json.NewDecoder(r.Body)
 		var req request

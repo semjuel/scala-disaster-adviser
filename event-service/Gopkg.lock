@@ -10,6 +10,14 @@
   version = "v0.0.2"
 
 [[projects]]
+  digest = "1:59f6147a4770527f7e44b4e67e6c59429d0468a37af2ce3fa71cf06b92da6e3e"
+  name = "github.com/jasonlvhit/gocron"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c21418a78e8acd5ffefca47dc353df67222e5c8"
+  version = "0.1"
+
+[[projects]]
   digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
   name = "github.com/joho/godotenv"
   packages = ["."]
@@ -86,6 +94,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/jasonlvhit/gocron",
     "github.com/joho/godotenv",
     "github.com/lib/pq",
     "github.com/segmentio/kafka-go",
