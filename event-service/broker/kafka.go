@@ -11,10 +11,11 @@ import (
 )
 
 type msg struct {
-	Name string
-	Date int64
-	Lat  float64
-	Lon  float64
+	Name    string
+	Date    int64
+	Lat     float64
+	Lon     float64
+	Summary string
 }
 
 func SendEvent() {
@@ -34,6 +35,7 @@ func SendEvent() {
 		1610804729,
 		45.234235,
 		90.34234,
+		"Event name #1",
 	}
 	b1, err := json.Marshal(msg1)
 	if err != nil {
