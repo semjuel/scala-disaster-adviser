@@ -2,7 +2,11 @@ version: '3.7'
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:6.0.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -43,6 +47,29 @@ services:
       - 8002:8002
     volumes:
       - ./:/go/src/scala-disaster-adviser
+
+  event-service-job:
+    build:
+      context: .
+      dockerfile: ./docker/event-service-job/Dockerfile
+    depends_on:
+      - broker
+    volumes:
+      - ./:/go/src/scala-disaster-adviser
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: .
+      dockerfile: ./docker/notification-service/Dockerfile
+    depends_on:
+      - broker
+    ports:
+      - 8080:8080
+    environment:
+      - KAFKA_SERVER=broker:29092
+      - USER_SERVICE_ENDPOINT=event-service/events
+      - DISASTER_SERVICE_ENDPOINT=192.168.0.111:8090/disasters
 
   da_postgresql:
     image: postgis/postgis
