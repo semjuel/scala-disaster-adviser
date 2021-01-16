@@ -41,6 +41,8 @@ services:
       dockerfile: ./docker/event-service/Dockerfile
     ports:
       - 8002:8002
+    volumes:
+      - ./:/go/src/scala-disaster-adviser
 
   da_postgresql:
     image: postgis/postgis
