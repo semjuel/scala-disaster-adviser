@@ -10,6 +10,8 @@ import lombok.Value;
 public class NotificationDto {
     String disasterDescription;
 
+    String userEventDescription;
+
     Float lon;
 
     Float lat;
