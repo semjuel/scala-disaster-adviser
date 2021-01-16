@@ -16,12 +16,13 @@ type EventSearch struct {
 
 type Event struct {
 	id        int
-	Summary   string    `json:"description"`
-	Uuid      string    `json:"name"`
-	Location  string    `json:"location"`
-	Latitude  float64   `json:"lat"`
-	Longitude float64   `json:"lon"`
-	StartDate time.Time `json:"date"`
+	Summary   string  `json:"description"`
+	Uuid      string  `json:"name"`
+	Location  string  `json:"location"`
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lon"`
+	Date      int64   `json:"date"`
+	startDate time.Time
 	endDate   time.Time
 }
 
@@ -53,8 +54,10 @@ func (e EventSearch) FindEvents() EventResponse {
 
 	for rows.Next() {
 		var event Event
-		err := rows.Scan(&event.id, &event.Summary, &event.Uuid, &event.Location, &event.Latitude, &event.Longitude, &event.StartDate, &event.endDate)
+		err := rows.Scan(&event.id, &event.Summary, &event.Uuid, &event.Location, &event.Latitude, &event.Longitude, &event.startDate, &event.endDate)
 		if err == nil {
+			event.Date = event.startDate.UnixNano() / int64(time.Millisecond)
+
 			events = append(events, event)
 		} else {
 			log.Printf("Error %s", err)
