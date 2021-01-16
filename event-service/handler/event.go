@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"scala-disaster-adviser/event-service/model"
-	"strconv"
-	"time"
 )
 
 type request struct {
@@ -15,8 +13,8 @@ type request struct {
 }
 
 type date struct {
-	Timestamp string `json:"timestamp"`
-	Range     int64  `json:"range"`
+	Timestamp int64 `json:"timestamp"`
+	Range     int64 `json:"range"`
 }
 
 type location struct {
@@ -74,27 +72,11 @@ func getRadius(r request) int64 {
 }
 
 func getStartDate(r request) int64 {
-	now := time.Now()
-	sec := now.Unix()
-
-	value, err := strconv.ParseInt(r.Date.Timestamp, 10, 32)
-	if err != nil {
-		return sec - r.Date.Range
-	}
-
-	return value - r.Date.Range
+	return r.Date.Timestamp - r.Date.Range
 }
 
 func getEndDate(r request) int64 {
-	now := time.Now()
-	sec := now.Unix()
-
-	value, err := strconv.ParseInt(r.Date.Timestamp, 10, 32)
-	if err != nil {
-		return sec + r.Date.Range
-	}
-
-	return value + r.Date.Range
+	return r.Date.Timestamp + r.Date.Range
 }
 
 func getLongitude(r request) float64 {
