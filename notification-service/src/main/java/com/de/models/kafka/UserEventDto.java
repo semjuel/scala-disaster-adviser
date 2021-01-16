@@ -13,6 +13,8 @@ public class UserEventDto {
 
     String name;
 
+    String description;
+
     Float lat;
 
     Float lon;
