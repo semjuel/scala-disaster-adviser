@@ -8,21 +8,23 @@ from confluent_kafka import Producer
 import os
 import socket
 
+conf = {'bootstrap.servers': os.environ['KAFKA_HOST'],
+        'client.id': socket.gethostname()}
+producer = Producer(conf)
+key_counter = 1
 
 def send_notification(event):
     print(event)
-    notification = {
-        "disaster": {"description": event['title'],
-                 "date": datetime.timestamp(pd.to_datetime(event['geometry'][0]['date'])),
-                 "lat": event['geometry'][0]['coordinates'][0],
-                 "lon": event['geometry'][0]['coordinates'][1]}
-    }
-    print(notification)
-
-    conf = {'bootstrap.servers': os.environ['KAFKA_HOST'],
-            'client.id': socket.gethostname()}
-    producer = Producer(conf)
-    producer.produce(os.environ['KAFKA_TOPIC'], key=event['id'], value=bytes(str(notification), 'utf-8'))
+    global key_counter
+    if len(event['geometry']) > 0 and len(event['geometry'][0]['coordinates']) > 0:
+        notification = {
+            "disaster": {"description": event['title'],
+                     "date": datetime.timestamp(pd.to_datetime(event['geometry'][0]['date'])),
+                     "lat": event['geometry'][0]['coordinates'][0],
+                     "lon": event['geometry'][0]['coordinates'][1]}
+        }
+        print(notification)
+        producer.produce(os.environ['KAFKA_TOPIC'], key=str(++key_counter), value=bytes(str(notification), 'utf-8'))
 
 
 def get_events():
