@@ -25,8 +25,10 @@ def echo():
     lon_min = data['location']['lon']-data['location']['range']
     lon_max = data['location']['lon']+data['location']['range']
 
-    date_min = datetime.fromtimestamp(int(data['date']['timestamp'])-data['date']['range'])
-    date_max = datetime.fromtimestamp(int(data['date']['timestamp'])+data['date']['range'])
+    date_range = int(data['date']['range'] / 1000)
+
+    date_min = datetime.fromtimestamp(int(data['date']['timestamp']) - date_range)
+    date_max = datetime.fromtimestamp(int(data['date']['timestamp']) + date_range)
     print(date_min, date_max)
 
     answer = list(collection.find({"$and": [{'geometry.0.coordinates.0': {'$gt': lat_min, '$lt': lat_max}},
@@ -40,7 +42,7 @@ def echo():
 
 def form_answer(item):
     return {"description": item['title'],
-                 "date": int(datetime.timestamp(pd.to_datetime(item['geometry'][0]['date']))),
+                 "date": int(datetime.timestamp(pd.to_datetime(item['geometry'][0]['date']))) * 1000,
                  "lat": item['geometry'][0]['coordinates'][0],
                  "lon": item['geometry'][0]['coordinates'][1]}
 

@@ -19,7 +19,7 @@ def send_notification(event):
     if len(event['geometry']) > 0 and len(event['geometry'][0]['coordinates']) > 1:
         notification = {
             "disaster": {"description": event['title'],
-                     "date": int(datetime.timestamp(pd.to_datetime(event['geometry'][0]['date']))),
+                     "date": int(datetime.timestamp(pd.to_datetime(event['geometry'][0]['date']))) * 1000,
                      "lat": event['geometry'][0]['coordinates'][0],
                      "lon": event['geometry'][0]['coordinates'][1]}
         }
