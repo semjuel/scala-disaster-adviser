@@ -33,7 +33,7 @@ def echo():
                                          {'geometry.0.coordinates.1': {'$gt': lon_min, '$lt': lon_max}},
                                             {'geometry.0.date': {'$gt': str(date_min), '$lt': str(date_max)}}]}))
 
-    answer = {"events": [form_answer(i) for i in answer]}
+    answer = {"disasters": [form_answer(i) for i in answer]}
     print(answer)
     return jsonify(answer)
 
