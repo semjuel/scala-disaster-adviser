@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 
-@app.route("/new", methods=['POST'])#
+@app.route("/events", methods=['POST'])#
 def echo():
     data = request.get_json()
     print(f"Got {data['user']} info")
@@ -40,7 +40,7 @@ def echo():
 
 def form_answer(item):
     return {"description": item['title'],
-                 "date": datetime.timestamp(pd.to_datetime(item['geometry'][0]['date'])),
+                 "date": int(datetime.timestamp(pd.to_datetime(item['geometry'][0]['date']))),
                  "lat": item['geometry'][0]['coordinates'][0],
                  "lon": item['geometry'][0]['coordinates'][1]}
 
