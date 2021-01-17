@@ -74,7 +74,8 @@ services:
     hostname: notification-service
     container_name: notification-service
     build:
-      context: https://github.com/semjuel/scala-disaster-adviser.git#:notification-service/src/docker
+      context: .
+      dockerfile: ./docker/notification-service/Dockerfile
     depends_on:
       - broker
       - event-service
@@ -85,3 +86,37 @@ services:
       - USER_SERVICE_ENDPOINT=http://192.168.0.111:8090/user-events
       - DISASTER_SERVICE_ENDPOINT=http://192.168.0.111:8090/disasters
 
+  disaster-service:
+    hostname: event-service
+    build:
+      context: .
+      dockerfile: ./docker/disaster-service/Dockerfile
+    depends_on:
+      - mongo
+      - broker
+    environment:
+      KAFKA_HOST: broker:29092
+      KAFKA_TOPIC: disaster-events
+      MONGO_HOST: mongo
+      MONGO_USER: root
+      MONGO_PASS: root
+
+  disaster-service-server:
+    build:
+      context: .
+      dockerfile: ./docker/disaster-service-server/Dockerfile
+    depends_on:
+      - mongo
+    ports:
+      - 8003:8003
+    environment:
+      MONGO_HOST: mongo
+      MONGO_USER: root
+      MONGO_PASS: root
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
