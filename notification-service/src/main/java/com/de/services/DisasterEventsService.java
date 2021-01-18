@@ -65,6 +65,7 @@ public class DisasterEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseDisasterEvent)
                 .onErrorResume(this::logError)
+                .doOnNext(disasterEventDto -> LOGGER.info("Disaster event = " + disasterEventDto))
                 .filter(this::validateDisasterEventDto);
     }
 
@@ -115,12 +116,12 @@ public class DisasterEventsService {
             return false;
         }
         final Float lat = disaster.getLat();
-        if (lat == null || lat < 0) {
+        if (lat == null) {
             return false;
         }
 
         final Float lon = disaster.getLon();
-        if (lon == null || lon < 0) {
+        if (lon == null) {
             return false;
         }
 

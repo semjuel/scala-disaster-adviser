@@ -7,6 +7,7 @@ import com.de.models.UserResponse;
 import com.de.models.kafka.DisasterEventDto;
 import com.de.models.kafka.UserEventDto;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,7 +42,8 @@ public class NotificationService {
         return userEventsService.streamUserEvents(userName)
                 .flatMap(userEventDto -> disasterEventsService.getDisasterEvents(userEventDto.getLat(),
                         userEventDto.getLon(), coordinatesGap, userEventDto.getDate(), timestampGap)
-                        .map(disasterResponse -> makeOnUserEventNotification(disasterResponse, userEventDto)));
+                        .map(disasterResponse -> makeOnUserEventNotification(disasterResponse, userEventDto))
+                        .filter(Objects::nonNull));
     }
 
     private Flux<NotificationDto> streamOnDisasterEventNotifications(String userName) {

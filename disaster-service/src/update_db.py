@@ -24,7 +24,7 @@ def send_notification(event):
                      "lon": event['geometry'][0]['coordinates'][1]}
         }
         print(notification)
-        producer.produce(os.environ['KAFKA_TOPIC'], key=str(++key_counter), value=bytes(str(notification), 'utf-8'))
+        producer.produce(os.environ['KAFKA_TOPIC'], key=str(++key_counter), value=bytes(json.dumps(notification), 'utf-8'))
 
 
 def get_events():

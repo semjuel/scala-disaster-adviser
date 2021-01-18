@@ -66,12 +66,13 @@ public class UserEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseUserEvent)
                 .onErrorContinue(this::logError)
-                .filter(userEventDto -> userEventDto.getName().equals(username))
-                .filter(this::validateUserEventDto);
+                .doOnNext(userEventDto -> LOGGER.info("Calendar event = " + userEventDto))
+                .filter(this::validateUserEventDto)
+                .filter(userEventDto -> userEventDto.getName().equals(username));
     }
 
     public Mono<UserResponse> getUserEvents(String username, float lat, float lon, float coordinateGap,
-                                               long timestamp, long timeGap) {
+                                            long timestamp, long timeGap) {
         return webClient.post()
                 .uri(userServiceEndpoint)
                 .body(Mono.just(prepareUserRequest(username, lat, lon, coordinateGap, timestamp, timeGap)),
@@ -115,12 +116,12 @@ public class UserEventsService {
 
     private boolean validateUserEventDto(UserEventDto userEvent) {
         final Float lat = userEvent.getLat();
-        if (lat == null || lat < 0) {
+        if (lat == null) {
             return false;
         }
 
         final Float lon = userEvent.getLon();
-        if (lon == null || lon < 0) {
+        if (lon == null) {
             return false;
         }
 
