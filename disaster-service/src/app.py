@@ -11,7 +11,6 @@ app = Flask(__name__)
 @app.route("/events", methods=['POST'])#
 def echo():
     data = request.get_json()
-    print(f"Got {data['user']} info")
 
     conn = MongoClient(os.environ['MONGO_HOST'], username=os.environ['MONGO_USER'], password=os.environ['MONGO_PASS'])
     print("Connected successfully!!!")

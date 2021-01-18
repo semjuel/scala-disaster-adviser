@@ -66,7 +66,7 @@ public class UserEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseUserEvent)
                 .onErrorContinue(this::logError)
-                .doOnNext(userEventDto -> LOGGER.info("Calendar event = " + userEventDto))
+//                .doOnNext(userEventDto -> LOGGER.info("Calendar event = " + userEventDto))
                 .filter(this::validateUserEventDto)
                 .filter(userEventDto -> userEventDto.getName().equals(username));
     }
@@ -75,6 +75,7 @@ public class UserEventsService {
                                             long timestamp, long timeGap) {
         return webClient.post()
                 .uri(userServiceEndpoint)
+                .header("content-type", "application/json")
                 .body(Mono.just(prepareUserRequest(username, lat, lon, coordinateGap, timestamp, timeGap)),
                         String.class)
                 .exchange()

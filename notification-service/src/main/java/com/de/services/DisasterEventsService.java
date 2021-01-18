@@ -65,7 +65,7 @@ public class DisasterEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseDisasterEvent)
                 .onErrorResume(this::logError)
-                .doOnNext(disasterEventDto -> LOGGER.info("Disaster event = " + disasterEventDto))
+//                .doOnNext(disasterEventDto -> LOGGER.info("Disaster event = " + disasterEventDto))
                 .filter(this::validateDisasterEventDto);
     }
 
@@ -73,6 +73,7 @@ public class DisasterEventsService {
                                                     long timeGap) {
         return webClient.post()
                 .uri(disastersEndpoint)
+                .header("content-type", "application/json")
                 .body(Mono.just(prepareDisasterRequest(lat, lon, coordinateGap, timestamp, timeGap)),
                         String.class)
                 .exchange()
