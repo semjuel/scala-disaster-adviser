@@ -10,7 +10,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-type msg struct {
+type Message struct {
 	Name        string  `json:"name"`
 	Date        int64   `json:"date"`
 	Lat         float64 `json:"lat"`
@@ -18,7 +18,7 @@ type msg struct {
 	Description string  `json:"description"`
 }
 
-func SendEvent() {
+func SendEvent(msg Message) {
 	topic := "user-events"
 	host := host()
 	conn, err := kafka.DialLeader(context.Background(), "tcp", host, topic, 0)
@@ -30,20 +30,13 @@ func SendEvent() {
 		log.Printf("kafka error: %s", err)
 	}
 
-	msg1 := msg{
-		"username",
-		1610804729,
-		45.234235,
-		90.34234,
-		"Event name #1",
-	}
-	b1, err := json.Marshal(msg1)
+	b, err := json.Marshal(msg)
 	if err != nil {
 		log.Printf("marshal error: %s", err)
 	}
 
 	_, err = conn.WriteMessages(
-		kafka.Message{Value: b1},
+		kafka.Message{Value: b},
 	)
 	if err != nil {
 		log.Printf("failed to write messages: %s", err)

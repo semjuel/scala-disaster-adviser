@@ -15,14 +15,16 @@ type EventSearch struct {
 
 type Event struct {
 	id        int
+	UserId    int64
+	EventId   string
 	Summary   string  `json:"description"`
 	Uuid      string  `json:"name"`
 	Location  string  `json:"location"`
 	Latitude  float64 `json:"lat"`
 	Longitude float64 `json:"lon"`
 	Date      int64   `json:"date"`
-	startDate time.Time
-	endDate   time.Time
+	StartDate time.Time
+	EndDate   time.Time
 }
 
 type EventResponse struct {
@@ -36,7 +38,7 @@ func (e EventSearch) FindEvents() EventResponse {
 
 	err := db.Connect()
 	if err != nil {
-		log.Printf("Database error %s", err)
+		log.Printf("database error %s", err)
 		return response
 	}
 
@@ -53,9 +55,9 @@ func (e EventSearch) FindEvents() EventResponse {
 
 	for rows.Next() {
 		var event Event
-		err := rows.Scan(&event.id, &event.Summary, &event.Uuid, &event.Location, &event.Latitude, &event.Longitude, &event.startDate, &event.endDate)
+		err := rows.Scan(&event.id, &event.Summary, &event.Uuid, &event.Location, &event.Latitude, &event.Longitude, &event.StartDate, &event.EndDate)
 		if err == nil {
-			event.Date = event.startDate.UnixNano() / int64(time.Millisecond)
+			event.Date = event.StartDate.UnixNano() / int64(time.Millisecond)
 
 			events = append(events, event)
 		} else {
@@ -68,4 +70,31 @@ func (e EventSearch) FindEvents() EventResponse {
 	}
 
 	return EventResponse{events}
+}
+
+func SaveEvent(event Event) error {
+	err := db.Connect()
+	if err != nil {
+		return err
+	}
+
+	insertQuery := "INSERT INTO events (user_id, event_id, summary, location, latitude, longitude, start_date, end_date, created, updated) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+	err = db.Instance.QueryRow(insertQuery, event.UserId, event.EventId, event.Summary, event.Location, event.Latitude,
+		event.Longitude, event.StartDate, event.EndDate, event.StartDate, event.StartDate).Scan()
+
+	return nil
+}
+
+func DeleteUserEvents(userId int64) {
+	err := db.Connect()
+	if err != nil {
+		log.Printf("database error %s", err)
+		return
+	}
+
+	_, err = db.Instance.Query("DELETE FROM events WHERE user_id = $1", userId)
+	if err != nil {
+		log.Printf("delete events error %s", err)
+		return
+	}
 }
