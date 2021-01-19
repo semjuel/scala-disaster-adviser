@@ -41,7 +41,8 @@ public class NotificationService {
         return userEventsService.streamUserEvents(userName)
                 .flatMap(userEventDto -> disasterEventsService.getDisasterEvents(userEventDto.getLat(),
                         userEventDto.getLon(), coordinatesGap, userEventDto.getDate(), timestampGap)
-                        .map(disasterResponse -> makeOnUserEventNotification(disasterResponse, userEventDto)));
+                        .flatMap(disasterResponse -> makeOnUserEventNotification(disasterResponse, userEventDto))
+                        .filter(Objects::nonNull));
     }
 
     private Flux<NotificationDto> streamOnDisasterEventNotifications(String userName) {
@@ -57,16 +58,17 @@ public class NotificationService {
                 disaster.getLon(), coordinatesGap, disaster.getDate(), timestampGap);
     }
 
-    private NotificationDto makeOnUserEventNotification(DisasterResponse disasterResponse, UserEventDto userEventDto) {
-        return CollectionUtils.isNotEmpty(disasterResponse.getDisasters()) || disasterResponse.getIsHot()
-                ? NotificationDto.builder()
+    private Mono<NotificationDto> makeOnUserEventNotification(DisasterResponse disasterResponse, UserEventDto userEventDto) {
+        return CollectionUtils.isNotEmpty(disasterResponse.getDisasters())
+                || Boolean.TRUE.equals(disasterResponse.getIsHot())
+                ? Mono.just(NotificationDto.builder()
                 .disasterDescription(makeDisasterDescription(disasterResponse))
                 .userEventDescription(userEventDto.getDescription())
                 .lat(userEventDto.getLat())
                 .lon(userEventDto.getLon())
                 .date(userEventDto.getDate())
-                .build()
-                : null;
+                .build())
+                : Mono.empty();
     }
 
     private String makeDisasterDescription(DisasterResponse disasterResponse) {

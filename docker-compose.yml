@@ -87,7 +87,7 @@ services:
       - DISASTER_SERVICE_ENDPOINT=http://192.168.0.111:8090/disasters
 
   disaster-service:
-    hostname: event-service
+    hostname: disaster-service
     build:
       context: .
       dockerfile: ./docker/disaster-service/Dockerfile
