@@ -2,7 +2,6 @@ package model
 
 import (
 	"log"
-	"scala-disaster-adviser/event-service/database"
 	"time"
 )
 
@@ -35,13 +34,13 @@ func (e EventSearch) FindEvents() EventResponse {
 	var response = EventResponse{empty}
 	var events []Event
 
-	db, err := database.Connect()
+	err := db.Connect()
 	if err != nil {
 		log.Printf("Database error %s", err)
 		return response
 	}
 
-	rows, err := db.Query("SELECT e.id, e.summary, u.uuid, e.location, e.latitude, e.longitude, e.start_date, e.end_date "+
+	rows, err := db.Instance.Query("SELECT e.id, e.summary, u.uuid, e.location, e.latitude, e.longitude, e.start_date, e.end_date "+
 		" FROM events e "+
 		" INNER JOIN users u ON u.id = e.user_id "+
 		" WHERE e.start_date >= $1 AND e.end_date <= $2 "+
