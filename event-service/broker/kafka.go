@@ -44,8 +44,6 @@ func SendEvent() {
 
 	_, err = conn.WriteMessages(
 		kafka.Message{Value: b1},
-		// kafka.Message{Value: []byte("two!")},
-		// kafka.Message{Value: []byte("three!")},
 	)
 	if err != nil {
 		log.Printf("failed to write messages: %s", err)
@@ -54,7 +52,6 @@ func SendEvent() {
 	if err := conn.Close(); err != nil {
 		log.Printf("failed to close writer: %s", err)
 	}
-
 }
 
 func host() string {
