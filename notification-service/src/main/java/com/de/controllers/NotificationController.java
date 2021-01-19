@@ -1,7 +1,6 @@
 package com.de.controllers;
 
 import com.de.models.NotificationDto;
-import com.de.services.DisasterEventsService;
 import com.de.services.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
