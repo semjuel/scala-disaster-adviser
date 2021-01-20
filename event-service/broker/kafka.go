@@ -36,7 +36,7 @@ func SendEvent(msg Message) {
 	}
 
 	_, err = conn.WriteMessages(
-		kafka.Message{Value: b},
+		kafka.Message{Key: []byte(msg.Name), Value: b},
 	)
 	if err != nil {
 		log.Printf("failed to write messages: %s", err)
