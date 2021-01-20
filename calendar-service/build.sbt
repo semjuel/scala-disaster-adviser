@@ -16,4 +16,7 @@ libraryDependencies ++= Seq(
   // JDBC with PostgreSQL
   "org.postgresql" % "postgresql" % postgresVersion,
   "com.github.dnvriend" %% "akka-persistence-jdbc" % "3.5.3",
+
+  "com.typesafe.slick" %% "slick" % "3.3.3",
+  "org.slf4j" % "slf4j-nop" % "1.6.4"
 )

@@ -2,6 +2,7 @@ package actors
 
 import akka.actor.Actor
 import akka.event.{Logging, LoggingAdapter}
+import slick.jdbc.PostgresProfile.api.Database
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
@@ -20,8 +21,15 @@ class SyncCalendarActor extends Actor {
   def runSync(): Unit = {
     implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
-
-
+    val db = Database.forConfig("databaseUrl")
+//    val repository = new UsersPostgresRepository(db)
+//    val f = repository.getAll
+//
+//    //f.map()
+//    f.onComplete{
+//      case Success(value) => log.info("Users repository was successfully prepared")
+//      case Failure(exception) => log.info("exception")
+//    }
 
     print("Sync run....")
   }
