@@ -65,7 +65,7 @@ public class DisasterEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseDisasterEvent)
                 .onErrorResume(this::logError)
-//                .doOnNext(disasterEventDto -> LOGGER.info("Disaster event = " + disasterEventDto))
+                .doOnNext(disasterEventDto -> LOGGER.info("Disaster event = " + disasterEventDto))
                 .filter(this::validateDisasterEventDto);
     }
 
@@ -79,7 +79,8 @@ public class DisasterEventsService {
                 .exchange()
                 .timeout(Duration.ofMillis(TIMEOUT),
                         Mono.just(ClientResponse.create(HttpStatus.REQUEST_TIMEOUT).build()))
-                .flatMap(this::handleDisasterServiceResponse);
+                .flatMap(this::handleDisasterServiceResponse)
+                .doOnNext(disasterResponse -> LOGGER.info("Queried DisasterResponse = " + disasterResponse));
     }
 
     private String prepareDisasterRequest(float lat, float lon, float coordinateGap, long timestamp, long timeGap) {

@@ -66,7 +66,7 @@ public class UserEventsService {
                 .map(ConsumerRecord::value)
                 .map(this::parseUserEvent)
                 .onErrorContinue(this::logError)
-//                .doOnNext(userEventDto -> LOGGER.info("Calendar event = " + userEventDto))
+                .doOnNext(userEventDto -> LOGGER.info("Calendar event = " + userEventDto))
                 .filter(this::validateUserEventDto)
                 .filter(userEventDto -> userEventDto.getName().equals(username));
     }
@@ -81,7 +81,8 @@ public class UserEventsService {
                 .exchange()
                 .timeout(Duration.ofMillis(TIMEOUT),
                         Mono.just(ClientResponse.create(HttpStatus.REQUEST_TIMEOUT).build()))
-                .flatMap(this::handleUserServiceResponse);
+                .flatMap(this::handleUserServiceResponse)
+                .doOnNext(userResponse -> LOGGER.info("Queried UserResponse = " + userResponse));
     }
 
     private String prepareUserRequest(String username, float lat, float lon, float coordinateGap, long timestamp,

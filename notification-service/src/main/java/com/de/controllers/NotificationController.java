@@ -29,6 +29,7 @@ public class NotificationController {
     @GetMapping(path = "/disaster-notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<NotificationDto> streamDisasterNotifications(@RequestParam String userName) {
         return notificationService.getNotifications(userName)
+                .limitRate(2)
                 .onErrorContinue((throwable, failedEvent) -> LOGGER.error("Event notification failed for {} with a"
                         + " reason {}", failedEvent, throwable.getMessage()));
     }
