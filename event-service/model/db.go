@@ -4,4 +4,4 @@ import (
 	"scala-disaster-adviser/event-service/database"
 )
 
-var db = database.Database{}
+var DB = database.Database{}

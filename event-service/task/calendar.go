@@ -47,6 +47,7 @@ func FetchEvents() {
 		for _, e := range events {
 			log.Printf("Start processing %s", e.Summary)
 			if e.Location == "" {
+				log.Printf("empty location")
 				return
 			}
 			lat, lon := getCoordinates(e.Location)
@@ -77,6 +78,7 @@ func FetchEvents() {
 				Lon:         lon,
 				Description: e.Summary,
 			}
+
 			broker.SendEvent(msg)
 		}
 	}
@@ -110,5 +112,5 @@ func makeRequest(token string) ([]CalendarEvent, error) {
 }
 
 func getCoordinates(location string) (float64, float64) {
-	return 45.3, 44.2
+	return 49.841952, 24.0315921
 }

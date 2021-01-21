@@ -36,13 +36,13 @@ func (e EventSearch) FindEvents() EventResponse {
 	var response = EventResponse{empty}
 	var events []Event
 
-	err := db.Connect()
+	err := DB.Connect()
 	if err != nil {
 		log.Printf("database error %s", err)
 		return response
 	}
 
-	rows, err := db.Instance.Query("SELECT e.id, e.summary, u.uuid, e.location, e.latitude, e.longitude, e.start_date, e.end_date "+
+	rows, err := DB.Instance.Query("SELECT e.id, e.summary, u.uuid, e.location, e.latitude, e.longitude, e.start_date, e.end_date "+
 		" FROM events e "+
 		" INNER JOIN users u ON u.id = e.user_id "+
 		" WHERE e.start_date >= $1 AND e.end_date <= $2 "+
@@ -73,26 +73,27 @@ func (e EventSearch) FindEvents() EventResponse {
 }
 
 func SaveEvent(event Event) error {
-	err := db.Connect()
+	insertQuery := "INSERT INTO events (user_id, event_id, summary, location, latitude, longitude, start_date, end_date, created, updated) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+	_, err := DB.Instance.Exec(insertQuery, event.UserId, event.EventId, event.Summary, event.Location, event.Latitude,
+		event.Longitude, event.StartDate, event.EndDate, event.StartDate, event.StartDate)
 	if err != nil {
 		return err
 	}
 
-	insertQuery := "INSERT INTO events (user_id, event_id, summary, location, latitude, longitude, start_date, end_date, created, updated) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
-	err = db.Instance.QueryRow(insertQuery, event.UserId, event.EventId, event.Summary, event.Location, event.Latitude,
-		event.Longitude, event.StartDate, event.EndDate, event.StartDate, event.StartDate).Scan()
+	_, err = DB.Instance.Exec("UPDATE events SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) WHERE geom IS NULL;")
 
-	return nil
+	return err
 }
 
 func DeleteUserEvents(userId int64) {
-	err := db.Connect()
+	err := DB.Connect()
 	if err != nil {
 		log.Printf("database error %s", err)
 		return
 	}
 
-	_, err = db.Instance.Query("DELETE FROM events WHERE user_id = $1", userId)
+	_, err = DB.Instance.Query("DELETE FROM events WHERE user_id = $1", userId)
 	if err != nil {
 		log.Printf("delete events error %s", err)
 		return

@@ -13,7 +13,7 @@ type User struct {
 }
 
 func UserSave(user User) error {
-	err := db.Connect()
+	err := DB.Connect()
 	if err != nil {
 		return err
 	}
@@ -24,19 +24,19 @@ func UserSave(user User) error {
 	}
 
 	insertQuery := "INSERT INTO users (uuid, name, email, token) VALUES ($1, $2, $3, $4)"
-	err = db.Instance.QueryRow(insertQuery, user.Uuid, user.Name, user.Email, user.Token).Scan()
+	err = DB.Instance.QueryRow(insertQuery, user.Uuid, user.Name, user.Email, user.Token).Scan()
 
 	return err
 }
 
 func UserFindOneByEmail(email string) error {
-	err := db.Connect()
+	err := DB.Connect()
 	if err != nil {
 		return err
 	}
 
 	var id int = 0
-	err = db.Instance.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&id)
+	err = DB.Instance.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&id)
 	if id != 0 {
 		return nil
 	}
@@ -47,12 +47,12 @@ func UserFindOneByEmail(email string) error {
 func UserAll() ([]User, error) {
 	var users []User
 
-	err := db.Connect()
+	err := DB.Connect()
 	if err != nil {
 		return users, err
 	}
 
-	rows, err := db.Instance.Query("SELECT u.id, u.uuid, u.name, u.email, u.token FROM users u")
+	rows, err := DB.Instance.Query("SELECT u.id, u.uuid, u.name, u.email, u.token FROM users u")
 	if err != nil {
 		log.Printf("Wrong request to the db, %v", err)
 		return users, err
