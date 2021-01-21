@@ -21,6 +21,6 @@ func main() {
 	}
 	defer model.DB.Instance.Close()
 
-	gocron.Every(10).Seconds().Do(task.FetchEvents)
+	gocron.Every(1).Minute().Do(task.FetchEvents)
 	<-gocron.Start()
 }
