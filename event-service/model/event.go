@@ -76,7 +76,8 @@ func SaveEvent(event Event) error {
 	insertQuery := "INSERT INTO events (user_id, event_id, summary, location, latitude, longitude, start_date, end_date, created, updated) " +
 		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	_, err := DB.Instance.Exec(insertQuery, event.UserId, event.EventId, event.Summary, event.Location, event.Latitude,
-		event.Longitude, event.StartDate, event.EndDate, event.StartDate, event.StartDate)
+		event.Longitude, event.StartDate.Format(time.RFC3339), event.EndDate.Format(time.RFC3339),
+		event.StartDate.Format(time.RFC3339), event.StartDate.Format(time.RFC3339))
 	if err != nil {
 		return err
 	}

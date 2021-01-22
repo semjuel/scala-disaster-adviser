@@ -2,8 +2,10 @@ package task
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"scala-disaster-adviser/event-service/broker"
 	"scala-disaster-adviser/event-service/model"
 	"time"
@@ -23,6 +25,17 @@ type CalendarEvent struct {
 
 type DateTime struct {
 	DateTime string `json:"dateTime"`
+	Date     string `json:"date"`
+}
+
+type MapBoxResponse struct {
+	Type     string           `json:"FeatureCollection"`
+	Features []MapBoxFeatures `json:"features"`
+}
+
+type MapBoxFeatures struct {
+	Id     string    `json:"id"`
+	Center []float64 `json:"center"`
 }
 
 func FetchEvents() {
@@ -37,7 +50,6 @@ func FetchEvents() {
 	for _, user := range users {
 		events, err := makeRequest(user.Token)
 		if err != nil {
-			log.Println(err)
 			log.Printf("error %s", err)
 			continue
 		}
@@ -50,10 +62,16 @@ func FetchEvents() {
 				log.Printf("empty location")
 				return
 			}
-			lat, lon := getCoordinates(e.Location)
+			lon, lat := getCoordinates(e.Location)
 
 			start, _ := time.Parse(time.RFC3339, e.Start.DateTime)
+			if e.Start.DateTime == "" {
+				start, _ = time.Parse("2006-01-02", e.Start.Date)
+			}
 			end, _ := time.Parse(time.RFC3339, e.End.DateTime)
+			if e.End.DateTime == "" {
+				end, _ = time.Parse("2006-01-02", e.End.Date)
+			}
 
 			event := model.Event{
 				UserId:    user.Id,
@@ -112,5 +130,37 @@ func makeRequest(token string) ([]CalendarEvent, error) {
 }
 
 func getCoordinates(location string) (float64, float64) {
-	return 49.841952, 24.0315921
+	url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s",
+		url.QueryEscape(location),
+		"pk.eyJ1IjoiZGlzYXN0ZXItYWR2aXNlciIsImEiOiJja2s3MGRmMTMwN3lnMnZvMnpvczJ2YXlwIn0.7LrCNyVfyG3GmStj2Pl6NA")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println(err)
+		return 0, 0
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		return 0, 0
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	var data MapBoxResponse
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Println(err)
+		return 0, 0
+	}
+
+	features := data.Features
+	if len(features) > 0 {
+		feature := features[0]
+		if len(feature.Center) > 0 {
+			return feature.Center[0], feature.Center[1]
+		}
+	}
+
+	return 0, 0
 }
