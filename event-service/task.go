@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/jasonlvhit/gocron"
 	"github.com/joho/godotenv"
+	"github.com/reactivex/rxgo/v2"
 	"log"
 	"scala-disaster-adviser/event-service/model"
 	"scala-disaster-adviser/event-service/task"
@@ -24,6 +25,8 @@ func main() {
 	// Drop  all data in the database.
 	model.DropAll()
 
-	gocron.Every(1).Minute().Do(task.FetchEvents)
+	eventCh := make(chan rxgo.Item)
+
+	gocron.Every(1).Minute().Do(task.FetchEvents, eventCh)
 	<-gocron.Start()
 }
