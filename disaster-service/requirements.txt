@@ -5,6 +5,4 @@ pymongo==3.10.1
 confluent-kafka
 asyncio
 rx
-json
-os
 socket
