@@ -25,7 +25,7 @@ def send_notification(event):
     if len(event['geometry']) > 0 and len(event['geometry'][0]['coordinates']) > 1:
         notification = {
             "disaster": {"description": event['title'],
-                     "date": datetime.timestamp(pd.to_datetime(event['geometry'][0]['date'])),
+                     "date": int(datetime.timestamp(pd.to_datetime(event['geometry'][0]['date'])))*1000,
                      "lat": event['geometry'][0]['coordinates'][0],
                      "lon": event['geometry'][0]['coordinates'][1]}
         }
@@ -51,7 +51,7 @@ def intervalRead(rate, fun, collection) -> rx.Observable:
 
 
 async def main(loop):
-    conn = MongoClient()
+    conn = MongoClient(os.environ['MONGO_HOST'], username=os.environ['MONGO_USER'], password=os.environ['MONGO_PASS'])
     print("Connected successfully!!!")
 
     collection = conn.disaster.events
